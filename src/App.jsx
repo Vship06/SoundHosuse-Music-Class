@@ -1,10 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Link,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import {
   ArrowRight,
@@ -1165,20 +1159,74 @@ function TeachersPage({ onBook }) {
 }
 
 function ScrollToHash() {
-  const { hash } = useLocation();
+  const { pathname, hash } = useLocation();
+
   useEffect(() => {
-    if (hash) {
-      const id = hash.replace("#", "");
-      requestAnimationFrame(() => {
-        document
-          .getElementById(id)
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    let cancelled = false;
+
+    const scrollToTarget = () => {
+      if (cancelled) return;
+
+      if (hash) {
+        const id = decodeURIComponent(hash.slice(1));
+        const target = document.getElementById(id);
+
+        if (target) {
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          return;
+        }
+
+        // The route may have rendered but the target section
+        // may not be in the DOM yet. Try again on the next frame.
+        requestAnimationFrame(scrollToTarget);
+        return;
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
       });
-    } else {
-      window.scrollTo({ top: 0 });
-    }
-  }, [hash]);
+    };
+
+    const frame = requestAnimationFrame(scrollToTarget);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
+  }, [pathname, hash]);
+
   return null;
+}
+
+function NotFoundPage() {
+  return (
+    <main className="mx-auto flex min-h-[65vh] w-[92vw] max-w-[1180px] items-center justify-center py-20">
+      <div className="max-w-xl text-center">
+        <div className="label">404 · Page not found</div>
+
+        <h1 className="mt-3 font-display text-[clamp(3rem,7vw,5.5rem)] font-bold leading-none tracking-[-.05em]">
+          This page missed the beat.
+        </h1>
+
+        <p className="mt-5 text-lg leading-8 text-[#69645d]">
+          The page you requested does not exist. Head back to SoundHouse and
+          keep making music.
+        </p>
+
+        <Link
+          to="/"
+          className="mt-7 inline-flex items-center rounded-full bg-black px-6 py-3.5 font-bold text-white transition hover:bg-[#ff6b4a]"
+        >
+          Back to home
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Link>
+      </div>
+    </main>
+  );
 }
 
 function App() {
@@ -1212,10 +1260,7 @@ function App() {
             path="/teachers"
             element={<TeachersPage onBook={openBook} />}
           />
-          <Route
-            path="*"
-            element={<Home onBook={openBook} onJoinClass={openJoinClass} />}
-          />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Layout>
       <TrialModal
@@ -1231,10 +1276,4 @@ function App() {
   );
 }
 
-export default function Root() {
-  return (
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  );
-}
+export default App;
