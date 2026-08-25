@@ -6,7 +6,7 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -27,13 +27,28 @@ const toneClasses = {
 
 function Layout({ children, onBook }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { pathname, hash } = useLocation();
   const links = [
     ["/", "Home"],
     ["/classes", "Classes"],
     ["/teachers", "Teachers"],
-    ["/#schedule", "Schedule"],
+    ["/classes#schedule", "Schedule"],
     ["/#faq", "FAQ"],
   ];
+
+  // Close the mobile menu on Escape, and whenever the route changes.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname, hash]);
+
   return (
     <div className="min-h-screen bg-[#f7f3eb] text-[#171717]">
       <header className="sticky top-0 z-40 border-b border-black/5 bg-[#f7f3eb]/90 backdrop-blur-xl">
@@ -49,18 +64,24 @@ function Layout({ children, onBook }) {
             SOUNDHOUSE
           </Link>
           <nav
-            className={`${mobileOpen ? "absolute left-0 right-0 top-[74px] flex bg-[#f7f3eb] p-6 shadow-lg" : "hidden"} flex-col gap-5 md:static md:flex md:flex-row md:items-center md:bg-transparent md:p-0 md:shadow-none`}
+            className={`${mobileOpen ? "absolute left-0 right-0 top-[74px] z-10 flex bg-[#f7f3eb] p-6 shadow-lg" : "hidden"} flex-col gap-5 md:static md:z-auto md:flex md:flex-row md:items-center md:bg-transparent md:p-0 md:shadow-none`}
           >
-            {links.map(([href, label]) => (
-              <Link
-                key={href}
-                onClick={() => setMobileOpen(false)}
-                to={href}
-                className="text-sm text-[#55504a] transition hover:text-black"
-              >
-                {label}
-              </Link>
-            ))}
+            {links.map(([href, label]) => {
+              const isActive = href.includes("#")
+                ? pathname === href.split("#")[0] &&
+                  hash === "#" + href.split("#")[1]
+                : pathname === href;
+              return (
+                <Link
+                  key={href}
+                  onClick={() => setMobileOpen(false)}
+                  to={href}
+                  className={`text-sm transition hover:text-black ${isActive ? "font-bold text-black" : "text-[#55504a]"}`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </nav>
           <div className="flex items-center gap-2">
             <button
@@ -70,6 +91,8 @@ function Layout({ children, onBook }) {
               Book a trial <ArrowUpRight className="ml-1 inline h-4 w-4" />
             </button>
             <button
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
               className="rounded-xl border border-black p-2 md:hidden"
               onClick={() => setMobileOpen((v) => !v)}
             >
@@ -77,6 +100,13 @@ function Layout({ children, onBook }) {
             </button>
           </div>
         </div>
+        {mobileOpen && (
+          <button
+            aria-label="Close menu"
+            className="fixed inset-0 top-[74px] z-[5] bg-black/30 md:hidden"
+            onClick={() => setMobileOpen(false)}
+          />
+        )}
       </header>
       {children}
       <footer className="border-t border-black/10">
@@ -119,7 +149,7 @@ function TrialModal({ open, onClose, initialInstrument = "Guitar" }) {
           <div>
             <div className="label">Free trial session</div>
             <h3 className="mt-1 font-display text-3xl font-bold">
-              Let’s get you playing.
+              Let's get you playing.
             </h3>
           </div>
           <button onClick={onClose}>
@@ -141,7 +171,7 @@ function TrialModal({ open, onClose, initialInstrument = "Guitar" }) {
                 <h4 className="font-display text-xl font-bold">
                   What do you want to learn?
                 </h4>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {instruments.map((x) => (
                     <button
                       key={x.id}
@@ -158,7 +188,7 @@ function TrialModal({ open, onClose, initialInstrument = "Guitar" }) {
             {step === 2 && (
               <div>
                 <h4 className="font-display text-xl font-bold">
-                  What’s your experience?
+                  What's your experience?
                 </h4>
                 <div className="mt-4 grid gap-3">
                   {["Complete beginner", "Some experience", "Intermediate"].map(
@@ -289,7 +319,7 @@ function TrialModal({ open, onClose, initialInstrument = "Guitar" }) {
             </h3>
             <p className="mx-auto mt-3 max-w-md text-[#69645d]">
               We saved a <strong>{trial.instrument}</strong> trial for{" "}
-              <strong>{trial.time}</strong>. We’ll send the next steps to{" "}
+              <strong>{trial.time}</strong>. We'll send the next steps to{" "}
               {trial.email}.
             </p>
             <button
@@ -307,20 +337,12 @@ function TrialModal({ open, onClose, initialInstrument = "Guitar" }) {
 
 function Home({ onBook }) {
   const [selected, setSelected] = useState("guitar");
-  const [filter, setFilter] = useState("All");
   const [faqOpen, setFaqOpen] = useState(0);
   const instrument = instruments.find((x) => x.id === selected);
-  const visible = useMemo(
-    () =>
-      filter === "All"
-        ? classes
-        : classes.filter((x) => x.instrument === filter),
-    [filter],
-  );
 
   return (
     <>
-      <section className="mx-auto grid w-[92vw] max-w-[1180px] gap-10 py-12 md:grid-cols-[1.03fr_.97fr] md:items-center">
+      <section className="mx-auto grid w-[92vw] max-w-[1180px] gap-10 py-12 md:grid-cols-[1.03fr_.97fr] md:items-center md:py-20">
         <div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#cfc8bc] px-3 py-2 text-xs font-bold uppercase tracking-[.12em] text-[#5d5750]">
             <span className="h-2 w-2 rounded-full bg-[#5f9d3f]" /> New batches
@@ -461,7 +483,7 @@ function Home({ onBook }) {
               onClick={onBook}
               className="mt-6 w-full rounded-full bg-[#d9ff59] px-4 py-3 font-bold text-black"
             >
-              Build my trial plan ↗
+              Book a free trial ↗
             </button>
           </div>
         </div>
@@ -472,7 +494,7 @@ function Home({ onBook }) {
           <div>
             <div className="label text-[#aaa49d]">Our approach</div>
             <h2 className="section-title text-white">
-              Less “lesson”.
+              Less "lesson".
               <br />
               More <span className="text-[#d9ff59]">music.</span>
             </h2>
@@ -503,29 +525,24 @@ function Home({ onBook }) {
         </div>
       </section>
 
-      <section id="schedule" className="mx-auto w-[92vw] max-w-[1180px] py-20">
+      <section className="mx-auto w-[92vw] max-w-[1180px] py-20">
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="label">Live schedule</div>
-            <h2 className="section-title">Find a class that fits.</h2>
+            <div className="label">This week's picks</div>
+            <h2 className="section-title">A few open seats right now.</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {["All", "Guitar", "Piano", "Drums", "Vocals"].map((x) => (
-              <button
-                key={x}
-                onClick={() => setFilter(x)}
-                className={`rounded-full border px-4 py-2 text-sm font-bold ${filter === x ? "border-black bg-black text-white" : "border-black/15"}`}
-              >
-                {x}
-              </button>
-            ))}
-          </div>
+          <Link
+            to="/classes#schedule"
+            className="rounded-full border border-black px-5 py-2.5 text-sm font-bold"
+          >
+            See full schedule →
+          </Link>
         </div>
         <div className="overflow-hidden rounded-3xl border border-black/10 bg-[#fffdf8]">
-          {visible.map((x, i) => (
+          {classes.slice(0, 3).map((x, i) => (
             <div
               key={`${x.day}-${x.time}-${x.instrument}`}
-              className={`grid gap-3 p-5 md:grid-cols-[110px_1fr_180px_90px] md:items-center ${i !== visible.length - 1 ? "border-b border-black/8" : ""}`}
+              className={`grid gap-3 p-5 md:grid-cols-[110px_1fr_180px_90px] md:items-center ${i !== 2 ? "border-b border-black/8" : ""}`}
             >
               <div className="font-display font-bold">
                 {x.day} <span className="text-[#8a847c]">{x.time}</span>
@@ -578,7 +595,7 @@ function Home({ onBook }) {
                   {t.name}
                 </h3>
                 <p className="mt-2 text-sm text-[#69645d]">
-                  {t.experience} · {t.focus}
+                  {t.experience} · {t.focus} · ★ {t.rating.toFixed(1)}
                 </p>
               </div>
             </Link>
@@ -597,7 +614,7 @@ function Home({ onBook }) {
       <section className="mx-auto grid w-[92vw] max-w-[1180px] gap-4 py-20 md:grid-cols-[.9fr_1.1fr]">
         <div className="flex min-h-[300px] flex-col justify-between rounded-[30px] bg-[#ff6b4a] p-8 text-white">
           <div className="font-display text-3xl font-bold leading-tight">
-            “I stopped waiting to be good enough and started playing.”
+            "I stopped waiting to be good enough and started playing."
           </div>
           <div className="text-sm text-white/85">
             <strong>Riya, 22</strong>
@@ -609,8 +626,8 @@ function Home({ onBook }) {
           <div>
             <div className="font-bold text-[#ed6d45]">★★★★★</div>
             <p className="mt-5 text-xl leading-8">
-              “The biggest difference is that every class ends with me actually
-              playing a song. I can hear the improvement week to week.”
+              "The biggest difference is that every class ends with me actually
+              playing a song. I can hear the improvement week to week."
             </p>
           </div>
           <div className="text-sm text-[#6f6961]">— Aarav, piano learner</div>
@@ -667,7 +684,7 @@ function Home({ onBook }) {
             <h2 className="section-title">
               Bring the curiosity.
               <br />
-              We’ll bring the music.
+              We'll bring the music.
             </h2>
           </div>
           <button
@@ -752,7 +769,7 @@ function ClassesPage({ onBook }) {
                     onClick={onBook}
                     className="rounded-full bg-black px-4 py-2.5 text-sm font-bold text-white"
                   >
-                    Book trial ↗
+                    Book a free trial ↗
                   </button>
                 </div>
               </article>
@@ -762,7 +779,7 @@ function ClassesPage({ onBook }) {
       <section className="mx-auto w-[92vw] max-w-[1180px] pb-24">
         <div className="mb-7">
           <div className="label">Schedule</div>
-          <h2 className="section-title">This week’s classes</h2>
+          <h2 className="section-title">This week's classes</h2>
         </div>
         <div className="overflow-hidden rounded-3xl border border-black/10 bg-[#fffdf8]">
           {visible.map((x, i) => (
@@ -839,7 +856,7 @@ function TeachersPage({ onBook }) {
               </p>
               <div className="mt-5 flex items-center justify-between">
                 <span className="rounded-full bg-[#f1ece3] px-3 py-1 text-xs font-bold">
-                  4.9/5 rating
+                  ★ {t.rating.toFixed(1)} · {t.students} students
                 </span>
                 <ArrowUpRight className="h-5 w-5" />
               </div>
@@ -853,7 +870,7 @@ function TeachersPage({ onBook }) {
           <h2 className="section-title text-white">
             Start with the instrument.
             <br />
-            We’ll match the teacher.
+            We'll match the teacher.
           </h2>
           <button
             onClick={onBook}
@@ -889,13 +906,15 @@ function TeachersPage({ onBook }) {
                   {teacher.name}
                 </h3>
                 <p className="text-[#69645d]">
-                  {teacher.instrument} · {teacher.experience}
+                  {teacher.instrument} · {teacher.experience} · ★{" "}
+                  {teacher.rating.toFixed(1)}
                 </p>
               </div>
             </div>
             <p className="mt-6 leading-7 text-[#69645d]">
-              Works with beginners through advanced players, focusing on real
-              songs, confident technique and performance habits that last.
+              Has taught {teacher.students}+ students, from complete beginners
+              to advanced players, focusing on real songs, confident technique
+              and performance habits that last.
             </p>
             <button
               onClick={onBook}
@@ -910,12 +929,35 @@ function TeachersPage({ onBook }) {
   );
 }
 
+// React Router's <Link> only does client-side navigation — it never
+// triggers the browser's native "scroll to element with this id" behavior,
+// so hash links like /#schedule silently do nothing. This watches the
+// route and performs that scroll manually, on every navigation.
+function ScrollToHash() {
+  const { hash, pathname, key } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace("#", "");
+      // wait one frame so the destination route has actually rendered
+      requestAnimationFrame(() => {
+        document
+          .getElementById(id)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    } else {
+      window.scrollTo({ top: 0 });
+    }
+  }, [hash, pathname, key]);
+  return null;
+}
+
 function App() {
   const location = useLocation();
   const [trialOpen, setTrialOpen] = useState(false);
   const openBook = () => setTrialOpen(true);
   return (
     <>
+      <ScrollToHash />
       <Layout onBook={openBook}>
         <Routes>
           <Route path="/" element={<Home onBook={openBook} />} />
