@@ -35,3 +35,26 @@ button {
   letter-spacing: -0.045em;
   line-height: 1;
 }
+
+/* --- MARQUEE ANIMATION --- */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 0.75rem));
+  }
+}
+.animate-scroll {
+  animation: scroll 25s linear infinite;
+  will-change: transform;
+}
+
+/* --- HIDE SCROLLBAR FOR MOBILE SHELF --- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

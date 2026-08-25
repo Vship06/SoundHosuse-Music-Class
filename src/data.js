@@ -3,11 +3,10 @@ export const instruments = [
     id: "guitar",
     name: "Guitar",
     icon: "🎸",
-    tone: "orange",
     subtitle: "Acoustic, electric & fingerstyle",
     description:
       "Build rhythm, chords and confidence through songs you actually want to play.",
-    skills: ["Chords", "Strumming", "Improvisation", "Songwriting"],
+    skills: ["Strings", "Chords", "Rhythm"],
     teacher: "Aarav Mehta",
     basePrice: 1499,
   },
@@ -15,11 +14,10 @@ export const instruments = [
     id: "piano",
     name: "Piano",
     icon: "🎹",
-    tone: "lavender",
     subtitle: "Pop, classical & contemporary",
     description:
       "From reading your first notes to playing complete pieces with expression.",
-    skills: ["Technique", "Theory", "Pop", "Classical"],
+    skills: ["Keys", "Melody", "Harmony"],
     teacher: "Maya Rao",
     basePrice: 1799,
   },
@@ -27,11 +25,10 @@ export const instruments = [
     id: "drums",
     name: "Drums",
     icon: "🥁",
-    tone: "peach",
     subtitle: "Groove, technique & live playing",
     description:
       "Learn timing, fills and the confidence to lock into any song.",
-    skills: ["Groove", "Fills", "Timing", "Performance"],
+    skills: ["Rhythm", "Energy", "Groove"],
     teacher: "Kabir Shah",
     basePrice: 1699,
   },
@@ -39,13 +36,34 @@ export const instruments = [
     id: "vocals",
     name: "Vocals",
     icon: "🎤",
-    tone: "lime",
     subtitle: "Control, confidence & performance",
     description:
       "Train your voice safely while building pitch, control and stage presence.",
-    skills: ["Breath", "Pitch", "Control", "Performance"],
+    skills: ["Breath", "Pitch", "Control"],
     teacher: "Naina Kapoor",
     basePrice: 1599,
+  },
+  {
+    id: "violin",
+    name: "Violin",
+    icon: "🎻",
+    subtitle: "Classical & Strings",
+    description:
+      "Master bowing techniques and expressive melodies on the violin.",
+    skills: ["Strings", "Expression", "Soul"],
+    teacher: "Rohan Das",
+    basePrice: 1699,
+  },
+  {
+    id: "saxophone",
+    name: "Saxophone",
+    icon: "🎷",
+    subtitle: "Jazz & Blues",
+    description:
+      "Learn breath control and jazz improvisation to find your unique sound.",
+    skills: ["Breath", "Scales", "Improv"],
+    teacher: "Karan Singh",
+    basePrice: 1899,
   },
 ];
 
@@ -57,8 +75,6 @@ export const teachers = [
     focus: "Rock • Blues • Acoustic",
     rating: 4.9,
     students: 86,
-    image:
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80",
   },
   {
     name: "Maya Rao",
@@ -67,8 +83,6 @@ export const teachers = [
     focus: "Pop • Classical • Film",
     rating: 5.0,
     students: 64,
-    image:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80",
   },
   {
     name: "Kabir Shah",
@@ -77,8 +91,30 @@ export const teachers = [
     focus: "Rock • Funk • Live",
     rating: 4.8,
     students: 51,
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    name: "Naina Kapoor",
+    instrument: "Vocals",
+    experience: "8 yrs",
+    focus: "Pop • Theater • Pitch",
+    rating: 4.9,
+    students: 42,
+  },
+  {
+    name: "Rohan Das",
+    instrument: "Violin",
+    experience: "15 yrs",
+    focus: "Classical • Contemporary",
+    rating: 5.0,
+    students: 38,
+  },
+  {
+    name: "Karan Singh",
+    instrument: "Saxophone",
+    experience: "11 yrs",
+    focus: "Jazz • Blues • Improv",
+    rating: 4.8,
+    students: 29,
   },
 ];
 
